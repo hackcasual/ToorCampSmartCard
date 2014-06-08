@@ -5,9 +5,9 @@ enable_timer
 establish_context
 card_connect
 open_sc -security 1 -keyind 0 -keyver 0 -mac_key 404142434445464748494a4b4c4d4e4f -enc_key 404142434445464748494a4b4c4d4e4f // Open secure channel
-select -AID 01020304050607080900
+select -AID D2760001240102000000000000010000
 
-send_apdu -APDU 80010000023132
+send_apdu -APDU 00010000023132
 
 card_disconnect
 release_context
