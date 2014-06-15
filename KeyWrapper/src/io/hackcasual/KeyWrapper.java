@@ -21,7 +21,7 @@ public class KeyWrapper extends Applet {
 		case (byte)0xA4:
 			break;
 		// Decryption
-		case (byte)0x03:
+		case (byte)0x11:
 			if (pin.isValidated()) {
 
 				Cipher ciph = Cipher.getInstance(Cipher.ALG_AES_BLOCK_128_CBC_NOPAD, false);
@@ -36,7 +36,7 @@ public class KeyWrapper extends Applet {
 				ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED );
 			}
 		// Encryption
-		case (byte)0x02:
+		case (byte)0x12:
 			if (pin.isValidated()) {
 
 				Cipher ciph = Cipher.getInstance(Cipher.ALG_AES_BLOCK_128_CBC_NOPAD, false);
@@ -53,9 +53,19 @@ public class KeyWrapper extends Applet {
 		// Pin Unlock
 		case (byte)0x01:
 			if (!pin.check(buf, ISO7816.OFFSET_CDATA, buf[ISO7816.OFFSET_LC])) {
-				PINException.throwIt(PINException.ILLEGAL_VALUE);
+				ISOException.throwIt((short) (0x63C0 | pin.getTriesRemaining()));
 			}
 			break;
+
+        // Pin Change
+        case (byte)0x02:
+            if (pin.isValidated()) {
+                pin.update(buf, ISO7816.OFFSET_CDATA, buf[ISO7816.OFFSET_LC]);
+            } else {
+                ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED );
+            }
+            break;
+
 		default:
 			ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
 		}

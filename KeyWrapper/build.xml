@@ -8,7 +8,7 @@
   <property name="JAVA_PACKAGE" value="io/hackcasual"/>
   <property name="APPLET_NAME" value="KeyWrapper"/>
   <property name="PACKAGE_AID" value="0xda:0xab:0xba:0xad:0x00:0x00"/>
-  <property name="APPLET_AID" value="0xda:0xab:0xba:0xad:0x00:0x00:0x00:0x02"/>
+  <property name="APPLET_AID" value="${PACKAGE_AID}:0x00:0x02"/>
   <property name="VERSION" value="0.1"/>
   <target name="init">
     <mkdir dir="${build}"/>
@@ -38,4 +38,31 @@
     <delete dir="${build}"/>
     <delete dir="${test.build}"/>
   </target>
+  
+  <target name="gp_shell_aids">
+<property name="before" value="This is a value"/>
+<script language="javascript">
+    var package_aid = project.getProperty("PACKAGE_AID");
+    var applet_aid = project.getProperty("APPLET_AID");
+    project.setProperty("GP_PACKAGE_AID", package_aid.replaceAll("0x", "").replaceAll(":","").toUpperCase());
+    project.setProperty("GP_APPLET_AID", applet_aid.replaceAll("0x", "").replaceAll(":","").toUpperCase());
+</script>
+  </target>
+
+  <target name="remove" description="Removes exisiting application" depends="gp_shell_aids">
+    <java jar="${GP_JAR_PATH}/gp.jar" fork="true" classpath="lib.classpath">
+        <arg value="--delete"/>
+        <arg value="${GP_APPLET_AID}"/>
+    </java>
+    <java jar="${GP_JAR_PATH}/gp.jar" fork="true" classpath="lib.classpath">
+        <arg value="--delete"/>
+        <arg value="${GP_PACKAGE_AID}"/>
+    </java>
+  </target>
+  <target name="install" description="Removes exisiting application" depends="remove,convert">
+    <java jar="${GP_JAR_PATH}/gp.jar" fork="true" classpath="lib.classpath">
+        <arg value="--install"/>
+        <arg value="bin/io/hackcasual/javacard/hackcasual.cap"/>
+    </java>
+  </target>  
 </project>
