@@ -50,17 +50,17 @@
   </target>
 
   <target name="remove" description="Removes exisiting application" depends="gp_shell_aids">
-    <java jar="${GP_JAR_PATH}/gp.jar" fork="true" classpath="lib.classpath">
+    <java jar="${JAVACARD_HOME}/lib/gp.jar" fork="true" classpath="lib.classpath">
         <arg value="--delete"/>
         <arg value="${GP_APPLET_AID}"/>
     </java>
-    <java jar="${GP_JAR_PATH}/gp.jar" fork="true" classpath="lib.classpath">
+    <java jar="${JAVACARD_HOME}/lib/gp.jar" fork="true" classpath="lib.classpath">
         <arg value="--delete"/>
         <arg value="${GP_PACKAGE_AID}"/>
     </java>
   </target>
   <target name="install" description="Removes exisiting application" depends="remove,convert">
-    <java jar="${GP_JAR_PATH}/gp.jar" fork="true" classpath="lib.classpath">
+    <java jar="${JAVACARD_HOME}/lib/gp.jar" fork="true" classpath="lib.classpath">
         <arg value="--install"/>
         <arg value="bin/io/hackcasual/javacard/hackcasual.cap"/>
     </java>
