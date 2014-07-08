@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<project name="hello-smartcard" default="convert" basedir=".">
+  <description>Ant build for hello-smartcard applet</description>
+  <property name="src" location="src"/>
+  <property name="build" location="bin"/>
+  <!-- Load user specified extra properties -->
+  <property file="${user.home}/javacard.properties"/>
+  <property name="JAVA_PACKAGE" value="io/hackcasual"/>
+  <property name="APPLET_NAME" value="TimeLock"/>
+  <property name="PACKAGE_AID" value="0xda:0xab:0xba:0xad:0x00:0x03"/>
+  <property name="APPLET_AID" value="${PACKAGE_AID}:0x00:0x03"/>
+  <property name="VERSION" value="0.1"/>
+  <target name="init">
+    <mkdir dir="${build}"/>
+  </target>
+  <target name="compile" depends="init" description="compile the source">
+    <javac srcdir="${src}" destdir="${build}" includeantruntime="false" source="1.3" target="1.3">
+      <classpath>
+        <pathelement path="${JAVACARD_HOME}/lib/api.jar"/>
+      </classpath>
+    </javac>
+  </target>
+  <target depends="compile" name="convert" description="convert to .cap">
+    <java classname="com.sun.javacard.converter.Converter" fork="true" failonerror="true">
+      <arg line="-classdir ${build}"/>
+      <arg line="-verbose"/>
+      <arg line="-exportpath ${JAVACARD_HOME}/api_export_files"/>
+      <arg line="-out CAP JCA EXP"/>
+      <arg line="-applet ${APPLET_AID} ${APPLET_NAME}"/>
+      <arg line="${JAVA_PACKAGE} ${PACKAGE_AID} ${VERSION}"/>
+      <classpath>
+        <pathelement location="${JAVACARD_HOME}/lib/converter.jar"/>
+        <pathelement location="${JAVACARD_HOME}/lib/offcardverifier.jar"/>
+      </classpath>
+    </java>
+  </target>
+  <target name="clean" description="clean up">
+    <delete dir="${build}"/>
+    <delete dir="${test.build}"/>
+  </target>
+  
+  <target name="gp_shell_aids">
+<property name="before" value="This is a value"/>
+<script language="javascript">
+    var package_aid = project.getProperty("PACKAGE_AID");
+    var applet_aid = project.getProperty("APPLET_AID");
+    project.setProperty("GP_PACKAGE_AID", package_aid.replaceAll("0x", "").replaceAll(":","").toUpperCase());
+    project.setProperty("GP_APPLET_AID", applet_aid.replaceAll("0x", "").replaceAll(":","").toUpperCase());
+</script>
+  </target>
+
+  <target name="remove" description="Removes exisiting application" depends="gp_shell_aids">
+    <java jar="${JAVACARD_HOME}/lib/gp.jar" fork="true" classpath="lib.classpath">
+        <arg value="--delete"/>
+        <arg value="${GP_APPLET_AID}"/>
+    </java>
+    <java jar="${JAVACARD_HOME}/lib/gp.jar" fork="true" classpath="lib.classpath">
+        <arg value="--delete"/>
+        <arg value="${GP_PACKAGE_AID}"/>
+    </java>
+  </target>
+  <target name="install" description="Removes exisiting application" depends="remove,convert">
+    <java jar="${JAVACARD_HOME}/lib/gp.jar" fork="true" classpath="lib.classpath">
+        <arg value="--install"/>
+        <arg value="bin/io/hackcasual/javacard/hackcasual.cap"/>
+    </java>
+  </target>  
+</project>
